@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora TCO | Chevrolet Euro VI vs. Competencia</title>
+<style>
+:root{--navy:#10283f;--blue:#145b96;--pale:#eaf3fb;--gold:#f6c445;--ink:#172b3d;--muted:#5d6b78;--line:#d7e1e9;--green:#087b55}
+*{box-sizing:border-box}body{margin:0;background:#f3f6f9;color:var(--ink);font:16px/1.45 Arial,Helvetica,sans-serif}
+header{background:linear-gradient(120deg,#10283f,#234b69);color:white;padding:24px max(20px,calc((100% - 1200px)/2));display:flex;gap:18px;align-items:center}
+.logo{font-weight:900;font-size:22px;border:2px solid #e4b53b;padding:10px 12px;border-radius:10px;white-space:nowrap;color:#fff}
+header h1{margin:0;font-size:clamp(22px,3vw,34px)}header p{margin:4px 0 0;color:#dce9f3}
+main{max-width:1200px;margin:22px auto;padding:0 16px 32px}.intro{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin-bottom:18px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}
+h2{font-size:20px;margin:0 0 14px;color:var(--navy)}h3{font-size:15px;background:var(--pale);padding:8px 10px;margin:16px 0 10px;color:var(--blue);border-radius:6px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}.field label{display:block;font-size:13px;color:#425466;margin-bottom:4px}.field input{width:100%;padding:10px;border:1px solid #c8d5df;border-radius:7px;font:inherit;color:var(--ink)}
+.results{grid-column:1/-1}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.metric{background:#f5f8fb;border:1px solid var(--line);border-radius:10px;padding:15px}.metric span{display:block;color:var(--muted);font-size:13px}.metric strong{display:block;font-size:clamp(19px,2.4vw,27px);margin-top:6px;overflow-wrap:anywhere}.saving{background:#e7f6ef;border-color:#a9dcc7}.saving strong{color:var(--green)}
+table{border-collapse:collapse;width:100%;margin-top:16px;font-size:14px}th,td{padding:10px 9px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}th{background:#edf3f7;color:#243d52}tfoot{font-weight:bold;background:#fff2c8}
+.barrow{margin:16px 0}.barlabel{display:flex;justify-content:space-between;gap:10px;font-size:14px;margin-bottom:5px}.track{height:15px;background:#e4eaf0;border-radius:99px;overflow:hidden}.bar{height:100%;background:var(--blue);border-radius:99px}.bar.gray{background:#929da8}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}button{border:0;border-radius:8px;padding:12px 16px;font-weight:bold;cursor:pointer;background:var(--blue);color:white;font-size:14px}button.secondary{background:#eaf0f5;color:var(--navy);border:1px solid #cbd8e2}button:hover{filter:brightness(.95)}
+.note{font-size:12px;color:var(--muted);margin-top:14px}.footer{margin-top:18px;font-size:12px;color:var(--muted)}
+@media(max-width:760px){header{align-items:flex-start;flex-direction:column}.layout{grid-template-columns:1fr}.results{grid-column:auto}.cards{grid-template-columns:1fr}.fields{grid-template-columns:1fr 1fr}.panel{padding:15px}table{font-size:12px}th,td{padding:8px 5px}}
+@media print{body{background:#fff;font-size:12px}header{padding:14px 20px}main{max-width:none;margin:10px auto;padding:0}.layout{gap:10px}.panel,.intro{break-inside:avoid;box-shadow:none}.actions{display:none}.panel{padding:12px}input{border:0!important;padding:2px!important}h3{margin:8px 0}.note,.footer{font-size:10px}}
+</style>
+</head>
+<body>
+<header><div class="logo">CHEVROLET</div><div><h1>Calculadora TCO · Camiones Euro VI</h1><p>Compara el costo total de propiedad frente a la competencia</p></div></header>
+<main>
+<div class="intro"><strong>Cómo usarla:</strong> ingresa datos comparables de ambas alternativas. Los valores de inicio son solo ejemplos ilustrativos; reemplázalos por información real de cada camión y de la operación del cliente.</div>
+<div class="layout">
+<section class="panel">
+<h2>1. Datos de la operación</h2>
+<div class="fields">
+<div class="field"><label for="km">Kilómetros al año (km)</label><input id="km" type="number" min="0" value="100000"></div>
+<div class="field"><label for="years">Período de análisis (años)</label><input id="years" type="number" min="1" value="5"></div>
+<div class="field"><label for="diesel">Precio diésel ($/litro)</label><input id="diesel" type="number" min="0" value="1000"></div>
+<div class="field"><label for="currency">Moneda</label><input id="currency" value="CLP" disabled></div>
+</div>
+<h3>Chevrolet Euro VI</h3><div class="fields" id="chevFields"></div>
+<h3>Camión de la competencia</h3><div class="fields" id="compFields"></div>
+<div class="actions"><button onclick="calculate()">Actualizar cálculo</button><button class="secondary" onclick="resetExample()">Restablecer ejemplo</button></div>
+<p class="note">Rendimiento expresado en km/l. Los costos anuales se multiplican por los años del análisis. El valor residual se resta del costo total.</p>
+</section>
+<section class="panel">
+<h2>2. Resultado comparativo</h2>
+<div class="cards">
+<div class="metric"><span>TCO Chevrolet</span><strong id="chevTotal">$—</strong><span id="chevPerKm">Costo por km: —</span></div>
+<div class="metric"><span>TCO competencia</span><strong id="compTotal">$—</strong><span id="compPerKm">Costo por km: —</span></div>
+<div class="metric saving"><span>Diferencia a favor de Chevrolet*</span><strong id="saving">$—</strong><span id="savingPct">—</span></div>
+</div>
+<div class="barrow"><div class="barlabel"><span>Chevrolet Euro VI</span><strong id="chevBarLabel">—</strong></div><div class="track"><div class="bar" id="chevBar" style="width:0%"></div></div></div>
+<div class="barrow"><div class="barlabel"><span>Competencia</span><strong id="compBarLabel">—</strong></div><div class="track"><div class="bar gray" id="compBar" style="width:0%"></div></div></div>
+<table><thead><tr><th>Concepto</th><th>Chevrolet</th><th>Competencia</th></tr></thead><tbody id="breakdown"></tbody><tfoot><tr><td>TCO total</td><td id="chevFoot">—</td><td id="compFoot">—</td></tr></tfoot></table>
+<div class="actions"><button onclick="downloadCSV()">Exportar resultados a CSV</button><button class="secondary" onclick="window.print()">Imprimir / Guardar como PDF</button></div>
+<p class="note">*Una diferencia positiva significa que Chevrolet tiene menor TCO en los datos ingresados. La comparación no implica que una marca sea siempre más económica; depende de la operación y de la exactitud de los datos.</p>
+</section>
+</div>
+<div class="footer">Herramienta de simulación comercial. No es una cotización oficial ni reemplaza la validación de costos con el cliente. Considera precio de compra, combustible, costos operacionales anuales y valor residual estimado. No incluye financiamiento, impuestos recuperables ni costo de inactividad por defecto; puedes incorporar este último como un costo anual estimado.</div>
+</main>
+<script>
+const defs=[
+ ['price','Precio de compra (CLP)',55000000,'money'],
+ ['eff','Rendimiento promedio (km/l)',3.5,'number'],
+ ['maint','Mantención y reparaciones anual (CLP)',7000000,'money'],
+ ['tires','Neumáticos anual (CLP)',4000000,'money'],
+ ['insurance','Seguro anual (CLP)',2000000,'money'],
+ ['other','Impuestos y otros anual (CLP)',1000000,'money'],
+ ['adblue','AdBlue anual (CLP)',500000,'money'],
+ ['downtime','Costo de inactividad anual (CLP)',500000,'money'],
+ ['residual','Valor residual al final (%)',40,'percent']
+];
+const initial={chev:{price:55000000,eff:3.5,maint:7000000,tires:4000000,insurance:2000000,other:1000000,adblue:500000,downtime:500000,residual:40},comp:{price:52000000,eff:3.5,maint:7500000,tires:4500000,insurance:2000000,other:1000000,adblue:500000,downtime:700000,residual:35}};
+function buildFields(id,prefix){document.getElementById(id).innerHTML=defs.map(([key,label,val,type])=>`<div class="field"><label for="${prefix}_${key}">${label}</label><input id="${prefix}_${key}" type="number" min="0" step="${type==='number'?'0.1':'1'}" value="${initial[prefix][key]}"></div>`).join('')}
+buildFields('chevFields','chev');buildFields('compFields','comp');
+const n=id=>Math.max(0,Number(document.getElementById(id).value)||0);
+const money=v=>new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(Math.round(v));
+const get=(p)=>Object.fromEntries(defs.map(([k])=>[k,n(p+'_'+k)]));
+function model(a){let km=n('km'),years=n('years'),diesel=n('diesel');let fuel=a.eff>0?km/a.eff*diesel*years:0;let op=years*(a.maint+a.tires+a.insurance+a.other+a.adblue+a.downtime);let residual=a.price*Math.min(100,a.residual)/100;let total=a.price+fuel+op-residual;return {price:a.price,fuel,op,residual,total,perkm:km*years>0?total/(km*years):0}}
+let last={};
+function calculate(){
+ const years=n('years'),km=n('km');if(!years||!km){alert('Ingresa un período y kilometraje anual mayor que cero.');return}
+ let c=get('chev'),r=get('comp');if(!c.eff||!r.eff){alert('El rendimiento de ambas alternativas debe ser mayor que cero.');return}
+ let C=model(c),R=model(r),diff=R.total-C.total,pct=R.total?diff/R.total*100:0;last={c,r,C,R,diff,pct,km,years,diesel:n('diesel')};
+ document.getElementById('chevTotal').textContent=money(C.total);document.getElementById('compTotal').textContent=money(R.total);
+ document.getElementById('chevPerKm').textContent='Costo por km: '+money(C.perkm);document.getElementById('compPerKm').textContent='Costo por km: '+money(R.perkm);
+ document.getElementById('saving').textContent=money(Math.abs(diff));document.getElementById('saving').style.color=diff>=0?'#087b55':'#a65b00';
+ document.getElementById('savingPct').textContent=(diff>=0?'Menor TCO Chevrolet: ':'Mayor TCO Chevrolet: ')+Math.abs(pct).toFixed(1)+'% respecto de la competencia';
+ document.getElementById('chevBarLabel').textContent=money(C.total);document.getElementById('compBarLabel').textContent=money(R.total);
+ let max=Math.max(C.total,R.total,1);document.getElementById('chevBar').style.width=(C.total/max*100)+'%';document.getElementById('compBar').style.width=(R.total/max*100)+'%';
+ const rows=[['Precio de compra',C.price,R.price],['Combustible',C.fuel,R.fuel],['Mantención, neumáticos, seguro, otros, AdBlue e inactividad',C.op,R.op],['Valor residual (se resta)',-C.residual,-R.residual]];
+ document.getElementById('breakdown').innerHTML=rows.map(x=>`<tr><td>${x[0]}</td><td>${money(x[1])}</td><td>${money(x[2])}</td></tr>`).join('');
+ document.getElementById('chevFoot').textContent=money(C.total);document.getElementById('compFoot').textContent=money(R.total);
+}
+function resetExample(){document.getElementById('km').value=100000;document.getElementById('years').value=5;document.getElementById('diesel').value=1000;defs.forEach(([k])=>{document.getElementById('chev_'+k).value=initial.chev[k];document.getElementById('comp_'+k).value=initial.comp[k]});calculate()}
+function downloadCSV(){if(!last.C)calculate();if(!last.C)return;const {c,r,C,R,diff,pct,km,years,diesel}=last;let rows=[['CALCULADORA TCO - CHEVROLET EURO VI VS COMPETENCIA'],['Periodo (años)',years],['Kilómetros anuales',km],['Precio diésel CLP/litro',diesel],[],['Concepto','Chevrolet Euro VI','Competencia'],['Precio compra',C.price,R.price],['Combustible periodo',C.fuel,R.fuel],['Otros costos operacionales periodo',C.op,R.op],['Valor residual',C.residual,R.residual],['TCO total',C.total,R.total],['Costo por km',C.perkm,R.perkm],['Diferencia a favor de Chevrolet (positiva = Chevrolet menor TCO)',diff,''],['Diferencia porcentual respecto de competencia',pct.toFixed(2)+'%',''],[],['Nota','Simulación con datos ingresados; no es cotización oficial.']];const csv='\ufeff'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Comparativo_TCO_Chevrolet_EuroVI.csv';a.click();URL.revokeObjectURL(a.href)}
+document.querySelectorAll('input').forEach(el=>el.addEventListener('change',calculate));calculate();
+</script>
+</body></html>
